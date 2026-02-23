@@ -15,6 +15,13 @@ env/
 artifacts/checkpoints/
 artifacts/models/
 
+# Downloaded model weights
+models/
+
+# Generated outputs
+outputs/*
+!outputs/.gitkeep
+
 # HuggingFace cache
 .cache/
 *.safetensors
@@ -22,12 +29,16 @@ artifacts/models/
 *.ckpt
 *.pt
 *.pth
+*.gguf
 
 # Data
 /data/
 
 # Docker volumes
 docker/volumes/
+
+# Config with secrets (keep .env.example)
+config/.env
 
 # Logs
 *.log

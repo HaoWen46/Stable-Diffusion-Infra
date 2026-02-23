@@ -1,10 +1,28 @@
-.PHONY: install train-lora train-full serve test test-unit test-integration lint fmt help
+# Load config/.env if it exists
+-include config/.env
+export
+
+.PHONY: install download-model generate train-lora train-full serve test test-unit test-integration lint fmt help
 
 CONFIG ?= training/config/lora.yaml
 
 ## Setup
 install:
 	uv sync --all-extras
+
+## Model deployment
+download-model:
+	uv run scripts/download_model.py
+
+generate:
+	uv run scripts/generate.py
+
+generate-custom:
+	uv run scripts/generate.py \
+		--prompt "$(PROMPT)" \
+		--steps $(or $(STEPS),9) \
+		--seed $(or $(SEED),42) \
+		--out $(or $(OUT),outputs/custom.png)
 
 ## Training
 train-lora:
@@ -16,7 +34,7 @@ train-full:
 train-resume:
 	uv run torchrun --nproc_per_node=4 training/train.py --config $(CONFIG) --resume $(RESUME)
 
-## Inference
+## Inference server
 serve:
 	docker compose -f docker/docker-compose.yml up --build
 

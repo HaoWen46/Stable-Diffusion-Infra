@@ -1,11 +1,13 @@
 # Model weights and checkpoints — binary, large, not useful as context
 artifacts/checkpoints/
 artifacts/models/
+models/
 *.safetensors
 *.bin
 *.ckpt
 *.pt
 *.pth
+*.gguf
 
 # HuggingFace model cache
 .cache/
