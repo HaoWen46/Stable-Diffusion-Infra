@@ -41,6 +41,8 @@ dev = [
     "requests>=2.31.0",
     "ruff>=0.3.0",
     "mypy>=1.9.0",
+    "fakeredis>=2.34.0",
+    "aiohttp>=3.13.3",
 ]
 
 [tool.uv.sources]

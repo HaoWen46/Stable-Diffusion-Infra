@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Optional
 
 import torch
-from diffusers import StableDiffusionPipeline
+from diffusers import GGUFQuantizationConfig, ZImagePipeline, ZImageTransformer2DModel
 
 import structlog
 
@@ -21,27 +21,36 @@ log = structlog.get_logger()
 class InferencePipeline:
     def __init__(self, gpu_id: int) -> None:
         self.gpu_id = gpu_id
-        self.device = torch.device("cuda")  # CUDA_VISIBLE_DEVICES already set
+        self.device = torch.device("cuda")  # CUDA_VISIBLE_DEVICES already set by manager
         self._current_lora: Optional[str] = None
         self._pipe = self._load_base_pipeline()
 
-    def _load_base_pipeline(self) -> StableDiffusionPipeline:
-        base_model = os.environ.get("BASE_MODEL", "runwayml/stable-diffusion-v1-5")
-        log.info("loading_base_pipeline", model=base_model, gpu_id=self.gpu_id)
-        pipe = StableDiffusionPipeline.from_pretrained(
-            base_model,
-            torch_dtype=torch.float16,
-            safety_checker=None,
+    def _load_base_pipeline(self) -> ZImagePipeline:
+        gguf_file = Path(os.environ.get("MODEL_DIR", "models/z-image-turbo")) / os.environ.get(
+            "GGUF_FILE", "z_image_turbo-Q4_K_M.gguf"
         )
-        pipe = pipe.to(self.device)
-        pipe.enable_attention_slicing()
+        base_model = os.environ.get("BASE_MODEL", "Tongyi-MAI/Z-Image-Turbo")
+
+        log.info("loading_gguf_transformer", gguf=str(gguf_file), gpu_id=self.gpu_id)
+        transformer = ZImageTransformer2DModel.from_single_file(
+            str(gguf_file),
+            quantization_config=GGUFQuantizationConfig(compute_dtype=torch.bfloat16),
+            dtype=torch.bfloat16,
+        )
+
+        log.info("loading_pipeline", model=base_model, gpu_id=self.gpu_id)
+        pipe = ZImagePipeline.from_pretrained(
+            base_model,
+            transformer=transformer,
+            torch_dtype=torch.bfloat16,
+        ).to(self.device)
         return pipe
 
     def _maybe_swap_lora(self, lora_model_id: Optional[str]) -> None:
         if lora_model_id == self._current_lora:
             return
 
-        artifact_dir = Path(os.environ.get("ARTIFACT_DIR", "/artifacts"))
+        artifact_dir = Path(os.environ.get("ARTIFACT_DIR", "artifacts"))
 
         if self._current_lora is not None:
             self._pipe.unload_lora_weights()
@@ -64,10 +73,10 @@ class InferencePipeline:
         result = self._pipe(
             prompt=payload["prompt"],
             negative_prompt=payload.get("negative_prompt", ""),
-            num_inference_steps=payload.get("num_inference_steps", 20),
-            guidance_scale=payload.get("guidance_scale", 7.5),
-            width=payload.get("width", 512),
-            height=payload.get("height", 512),
+            num_inference_steps=payload.get("num_inference_steps", 9),
+            guidance_scale=payload.get("guidance_scale", 0.0),
+            width=payload.get("width", 1024),
+            height=payload.get("height", 1024),
             generator=generator,
         )
         image = result.images[0]

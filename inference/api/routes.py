@@ -3,6 +3,7 @@ API route handlers: /generate, /health, /models.
 """
 from __future__ import annotations
 
+import asyncio
 import uuid
 import time
 from typing import Optional
@@ -16,7 +17,7 @@ from inference.worker.queue import JobQueue
 router = APIRouter()
 queue = JobQueue()
 
-POLL_TIMEOUT_S = 60
+POLL_TIMEOUT_S = 120
 POLL_INTERVAL_S = 0.5
 
 
@@ -32,7 +33,7 @@ async def generate(request: GenerateRequest) -> GenerateResponse:
             if result.get("error"):
                 raise HTTPException(status_code=500, detail=result["error"])
             return GenerateResponse(job_id=job_id, image_b64=result["image_b64"])
-        time.sleep(POLL_INTERVAL_S)
+        await asyncio.sleep(POLL_INTERVAL_S)
 
     raise HTTPException(status_code=504, detail="Inference timed out")
 

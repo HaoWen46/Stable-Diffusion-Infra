@@ -41,6 +41,12 @@ serve:
 serve-down:
 	docker compose -f docker/docker-compose.yml down
 
+serve-local:
+	bash scripts/serve_local.sh
+
+load-test:
+	uv run scripts/load_test.py --url http://localhost:9000 --n 4
+
 ## Testing
 test: test-unit
 

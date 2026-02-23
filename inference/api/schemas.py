@@ -11,10 +11,10 @@ class GenerateRequest(BaseModel):
     prompt: str
     negative_prompt: str = ""
     lora_model_id: Optional[str] = None
-    num_inference_steps: int = Field(default=20, ge=1, le=150)
-    guidance_scale: float = Field(default=7.5, ge=0.0, le=30.0)
-    width: int = Field(default=512, ge=64, le=1024)
-    height: int = Field(default=512, ge=64, le=1024)
+    num_inference_steps: int = Field(default=9, ge=1, le=150)
+    guidance_scale: float = Field(default=0.0, ge=0.0, le=30.0)
+    width: int = Field(default=1024, ge=64, le=2048)
+    height: int = Field(default=1024, ge=64, le=2048)
     seed: Optional[int] = None
 
 
