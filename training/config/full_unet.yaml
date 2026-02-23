@@ -1,0 +1,15 @@
+run_id: full-unet-run-001
+training_mode: full_unet
+base_model: runwayml/stable-diffusion-v1-5
+
+data_dir: /data/images
+artifact_dir: /artifacts
+resolution: 512
+batch_size: 1
+num_workers: 4
+
+lr: 5.0e-6
+weight_decay: 1.0e-2
+max_steps: 20000
+save_every_steps: 1000
+gradient_accumulation_steps: 8

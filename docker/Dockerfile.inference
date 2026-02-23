@@ -1,0 +1,25 @@
+FROM nvcr.io/nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04
+
+WORKDIR /workspace
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.11 python3-pip git curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY pyproject.toml uv.lock* ./
+RUN uv sync --no-dev --frozen
+
+COPY . .
+
+ENV PYTHONPATH=/workspace
+ENV PATH="/workspace/.venv/bin:$PATH"
+ENV BASE_MODEL=runwayml/stable-diffusion-v1-5
+ENV ARTIFACT_DIR=/artifacts
+ENV REDIS_HOST=redis
+ENV REDIS_PORT=6379
+ENV NUM_GPUS=4
+
+ENTRYPOINT ["python", "-m", "inference.manager"]

@@ -1,0 +1,21 @@
+FROM nvcr.io/nvidia/pytorch:24.01-py3
+
+WORKDIR /workspace
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY pyproject.toml uv.lock* ./
+RUN uv sync --extra training --no-dev --frozen
+
+COPY . .
+
+ENV PYTHONPATH=/workspace
+ENV PATH="/workspace/.venv/bin:$PATH"
+ENV NCCL_DEBUG=INFO
+
+ENTRYPOINT ["torchrun", "--nproc_per_node=4", "training/train.py"]

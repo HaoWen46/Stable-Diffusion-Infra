@@ -1,0 +1,48 @@
+# Model weights and checkpoints — binary, large, not useful as context
+artifacts/checkpoints/
+artifacts/models/
+*.safetensors
+*.bin
+*.ckpt
+*.pt
+*.pth
+
+# HuggingFace model cache
+.cache/
+**/.cache/
+
+# Training data
+data/
+
+# Docker build context noise
+docker/volumes/
+
+# Generated images / outputs
+outputs/
+generated/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs (verbose, not useful for code context)
+logs/
+*.log
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Test caches and coverage reports
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/

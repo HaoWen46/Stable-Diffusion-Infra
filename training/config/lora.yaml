@@ -1,0 +1,25 @@
+run_id: lora-run-001
+training_mode: lora
+base_model: runwayml/stable-diffusion-v1-5
+
+data_dir: /data/images
+artifact_dir: /artifacts
+resolution: 512
+batch_size: 1
+num_workers: 4
+
+lr: 1.0e-4
+weight_decay: 1.0e-2
+max_steps: 10000
+save_every_steps: 500
+gradient_accumulation_steps: 4
+
+lora:
+  rank: 4
+  alpha: 32
+  dropout: 0.1
+  target_modules:
+    - to_q
+    - to_k
+    - to_v
+    - to_out.0
